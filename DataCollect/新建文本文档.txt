@@ -1,0 +1,19 @@
+CREATE DATABASE `laughterdb` /*!40100 DEFAULT CHARACTER SET latin1 */;
+
+
+
+
+DROP TABLE IF EXISTS `laughterdb`.`qiushi`;
+CREATE TABLE  `laughterdb`.`qiushi` (
+  `id_order` int(11) NOT NULL AUTO_INCREMENT,
+  `id_qiushi` varchar(32) NOT NULL,
+  `time_qiushi` datetime DEFAULT NULL,
+  `content` text,
+  `picPath` varchar(64) DEFAULT NULL,
+  `page` int(11) NOT NULL,
+  PRIMARY KEY (`id_order`),
+  UNIQUE KEY `id_qiushi` (`id_qiushi`)
+) ENGINE=InnoDB AUTO_INCREMENT=3234 DEFAULT CHARSET=utf8;
+
+
+
