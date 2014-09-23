@@ -13,7 +13,7 @@ CREATE TABLE  `laughterdb`.`qiushi` (
   `page` int(11) NOT NULL,
   PRIMARY KEY (`id_order`),
   UNIQUE KEY `id_qiushi` (`id_qiushi`)
-) ENGINE=InnoDB AUTO_INCREMENT=3234 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 
