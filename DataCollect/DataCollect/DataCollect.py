@@ -16,11 +16,26 @@ cursor = conn.cursor()
 print '连接数据库成功！'
 ii = 0
 j=0
+myfile = open('D:testit.txt', 'a')
 while True:
     url = 'http://www.qiushibaike.com/history'
     req = urllib2.Request(url,headers={'User-Agent' : "Magic Browser"})
     response = urllib2.urlopen(req)
     the_page = response.read().decode("UTF-8")
+
+    pattern = re.compile(r'<span class="date">\n(.*?)\n</span>')
+    date = pattern.findall(the_page)[0]
+    pattern = re.compile(r'\d*')
+    dateList = pattern.split(date)
+    date = date.replace(dateList[1],"-")
+    date = date.replace(dateList[2],"-")
+    date = date.replace(dateList[3],"")
+    count = cursor.execute('select * from datetotal where date_qiushi = \''+date+'\'' )
+    if(count != 0):
+        continue
+    sql = 'insert into datetotal(date_qiushi) values(\''+date+'\')'
+    cursor.execute(sql)
+    conn.commit()
     pageNum = 1
     pattern = re.compile(r'.*<a href="/history/page/(.*?)\?s=',re.DOTALL)
     pages = pattern.findall(the_page)
@@ -32,8 +47,7 @@ while True:
         pattern = re.compile(r'<a href="/history/page/\d*(.*?)">\d*</a>')
         weiba = pattern.findall(the_page)[0]
     while True:
-        pattern = re.compile(r'<span class="date">\n(.*?)\n</span>')
-        date = pattern.findall(the_page)[0]
+
         pattern = re.compile(r'<div class="article block untagged mb15.*?<li class="share">',re.DOTALL)
 
         matchGroup = pattern.findall(the_page)
@@ -65,7 +79,9 @@ while True:
                     ii=0
                 ii = ii+1
             except :
-                print sql
+                myfile.write(sql+'\n')
+                myfile.close()
+                myfile = open('D:testit.txt', 'a')
         pageNum = pageNum + 1
         if(pageNum > page):
             break
