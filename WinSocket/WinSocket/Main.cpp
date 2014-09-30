@@ -24,7 +24,7 @@ const char* gb23122utf8(const char* gb2312)
 int main()
 {
 	const char user[] = "root";         //username
-	const char pswd[] = "345920";         //password
+	const char pswd[] = "123456";         //password
 	const char host[] = "127.0.0.1";    //or"127.0.0.1"
 	const char table[] = "laughterdb";        //database
 	unsigned int port = 3306;           //server port    
@@ -34,6 +34,7 @@ int main()
 	MYSQL_FIELD *fd;
 	char column[32][32];
 	int res;
+	
 	mysql_init(&myCont);
 	if(!mysql_real_connect(&myCont,host,user,pswd,table,port,NULL,0))
 	{
@@ -71,19 +72,25 @@ int main()
 	SOCKADDR_IN addrClient;
 	int len=sizeof(SOCKADDR);
 	SOCKET sockConn=accept(sockSrv,(SOCKADDR*)&addrClient,&len);
+	std::string qul = "SELECT max(id_order) from qiushi";
+	mysql_query(&myCont,qul.c_str());
+	MYSQL_RES *m_res = mysql_store_result(&myCont);
+	MYSQL_ROW m_row;
+	m_row = mysql_fetch_row(m_res);
+	std::string str("");
+	str = m_row[0];
+	int total = atoi(str.c_str());
 	while(1)
 	{
 		char recvBuf[16];
 		recv(sockConn,recvBuf,16,0);
-		int a = 1 + rand()%100;
+		int a = 1 + rand()%total;
 		sprintf(recvBuf,"%d",a);
-		std::string qul = SQL + recvBuf;
+		qul = SQL + recvBuf;
 		qul += "'";
 		mysql_query(&myCont,qul.c_str());
-		MYSQL_RES *m_res = mysql_store_result(&myCont);
-
-		std::string str("");
-		MYSQL_ROW m_row;
+		m_res = mysql_store_result(&myCont);
+		
 		int rnum = 0;
 		m_row = mysql_fetch_row(m_res);
 		str = m_row[0];
@@ -94,13 +101,12 @@ int main()
 		sprintf(strLenStr,"%d",strLen);
 		
 		send(sockConn,strLenStr,32 ,0);
+		sprintf(strLenStr,"%d",a);
 		puts(strLenStr);
 
 		send(sockConn,tt,strLen+1,0);
-		
 
 		str = m_row[1];
-		str = "";
 		if(str != "")
 		{
 			char * buffer;
@@ -115,11 +121,12 @@ int main()
 			puts(strLenStr);
 			send(sockConn,strLenStr,32 ,0);
 			recv(sockConn,recvBuf,16,0);
-			send(sockConn,buffer,size,0);
+			int ss = send(sockConn,buffer,size,0);
+			delete[] buffer;
 		}
 		else
 		{
-			send(sockConn,"0",2,0);
+			send(sockConn,"0",32,0);
 		}
 	}
 	return 0;
