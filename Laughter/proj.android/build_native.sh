@@ -2,6 +2,13 @@ APPNAME="Laughter"
 
 # options
 
+NDK_ROOT=/cygdrive/e/software/miku/android-ndk-r8b
+COCOS2DX_ROOT=/cygdrive/e/myspace/cocos2d-x-2.2.3
+GAME_ROOT=$COCOS2DX_ROOT/projects/Laughter
+GAME_ANDROID_ROOT=$GAME_ROOT/proj.android
+RESOURCE_ROOT=$GAME_ROOT/Resources
+
+
 buildexternalsfromsource=
 
 usage(){

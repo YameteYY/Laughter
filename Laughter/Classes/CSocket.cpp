@@ -2,7 +2,7 @@
 #pragma comment( lib, "ws2_32.lib"  )
 CSocket::CSocket()
 {
-#if defined(WIN32)
+#ifdef SOCKET_WIN32
 	initSocket();
 #endif
 }
@@ -36,8 +36,18 @@ bool CSocket::connect(const char *adr, int port)
 }
 int CSocket::read(char *buf, int bufLength)
 {
-	int readInt = recv(handlerSocket, buf, bufLength, 0);
-	return readInt;
+	int readInt = 0;
+	int recLen = bufLength;
+	while(true)
+	{
+		readInt += recv(handlerSocket, &buf[readInt], recLen, 0);
+		recLen = bufLength - readInt;
+		if(readInt == bufLength)
+			break;
+		else
+			continue;
+	}
+	return bufLength;
 }
 int CSocket::write(char *buf, int bufLength)
 {
@@ -47,7 +57,7 @@ int CSocket::write(char *buf, int bufLength)
 bool CSocket::close()
 {
 	int closeInt = 0;
-#if defined(WIN32)
+#ifdef SOCKET_WIN32
 	closeInt =::shutdown(handlerSocket, 2);
 #else
 	closeInt =::shutdown(handlerSocket, SHUT_RDWR);

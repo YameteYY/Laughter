@@ -8,7 +8,10 @@ LOCAL_MODULE_FILENAME := libcocos2dcpp
 
 LOCAL_SRC_FILES := hellocpp/main.cpp \
                    ../../Classes/AppDelegate.cpp \
-                   ../../Classes/HelloWorldScene.cpp
+                   ../../Classes/CSocket.cpp\
+                   ../../Classes/Language.cpp\
+                   ../../Classes/LaughterScene.cpp\
+                   ../../Classes/QiushiMgr.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes
 
@@ -19,7 +22,6 @@ LOCAL_WHOLE_STATIC_LIBRARIES += chipmunk_static
 LOCAL_WHOLE_STATIC_LIBRARIES += cocos_extension_static
 
 include $(BUILD_SHARED_LIBRARY)
-
 $(call import-module,cocos2dx)
 $(call import-module,cocos2dx/platform/third_party/android/prebuilt/libcurl)
 $(call import-module,CocosDenshion/android)

@@ -18,6 +18,7 @@ public:
 
 	
 private:
+	void _scheduleCheckDownLoad(float dt);
 	void menuNextCallback(CCObject* pSender);
 	void downLoadTouched(CCObject* pSender,cocos2d::extension::CCControlEvent eve);
 	void _displayQiushi(Qiushi* qiushi);

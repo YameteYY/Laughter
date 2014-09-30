@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"/>
+
+<plist version="1.0">
+    <dict>
+        <key>currentPage</key>
+        <string>1</string>
+        <key>currentQiushi</key>
+        <string>2</string>
+        <key>largePage</key>
+        <string>0</string>
+        <key>picIndex</key>
+        <string>0</string>
+    </dict>
+</plist>

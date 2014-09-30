@@ -7,12 +7,14 @@
 USING_NS_CC;
 USING_NS_CC_EXT;
 
+pthread_mutex_t  counter_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 QiushiMgr* QiushiMgr::m_pInstance = 0;
 bool QiushiMgr::IsDown = true;
 
 void QiushiMgr::ReadConfig()
 {
-	CCDictionary* plistDic = CCDictionary::createWithContentsOfFile("qiushi/config.plist");
+	CCDictionary* plistDic = CCDictionary::createWithContentsOfFile("config.plist");
 	CCString* str = dynamic_cast<CCString*>(plistDic->objectForKey("currentPage"));
 	mCurrentPage = str->intValue();
 	
@@ -21,6 +23,9 @@ void QiushiMgr::ReadConfig()
 
 	str = dynamic_cast<CCString*>(plistDic->objectForKey("largePage"));
 	mLagePage = str->intValue();
+
+	str = dynamic_cast<CCString*>(plistDic->objectForKey("picIndex"));
+	mPicIndex = str->intValue();
 
 	_readQiushiList(mCurrentPage);
 	mCurrentQiushi--;
@@ -79,6 +84,41 @@ void QiushiMgr::UnDownLoadQiushi()
 {
 	IsDown = false;
 }
+void QiushiMgr::CheckDownLoadQiushi()
+{
+	pthread_mutex_lock(&counter_mutex);
+	int len = mDownQiushiList.size();
+	if(  len >= 100)
+	{
+		char strLen[64];
+		CCDictionary *dict = CCDictionary::create();
+		dict->retain();
+		for(int i=0;i<len;i++)
+		{
+			CCDictionary* qiushi = CCDictionary::create();
+			qiushi->retain();
+			CCString* conCCS = CCString::create(mDownQiushiList[i].content);
+			conCCS->retain();
+			qiushi->setObject(conCCS,"content" );
+			CCString* picCCS = CCString::create(mDownQiushiList[i].picPath);
+			picCCS->retain();
+			qiushi->setObject(picCCS,"picPath" );
+			sprintf(strLen,"qiushi%d",i);
+
+			dict->setObject(qiushi,strLen);
+			conCCS->release();
+			picCCS->release();
+		}
+		sprintf(strLen,"qiushi/%d.plist",++mLagePage);
+
+		dict->writeToFile(strLen);
+		dict->removeAllObjects();
+		dict->release();
+
+		mDownQiushiList.clear();
+	}
+	pthread_mutex_unlock(&counter_mutex);
+}
 void QiushiMgr::WriteConfig()
 {
 	char str[32];
@@ -89,45 +129,55 @@ void QiushiMgr::WriteConfig()
 	dict->setObject(CCString::create(str),"currentQiushi");
 	sprintf(str,"%d",mLagePage);
 	dict->setObject(CCString::create(str),"largePage");
-	dict->writeToFile("qiushi/config.plist");
+	sprintf(str,"%d",mPicIndex);
+	dict->setObject(CCString::create(str),"picIndex");
+	dict->writeToFile("config.plist");
 }
 void* QiushiMgr::DownLoad_thread(void *arg)
 {
 	CSocket* socket = QiushiMgr::Instance()->GetSocket();
 	socket->connect("127.0.0.1",6000);
 	char strLen[33];
-	char* content;
 	char picPath[64];
-	vector<Qiushi> qiushiList;
-	int qiushiCount = 0;
-	int lagePage = QiushiMgr::Instance()->mLagePage;
-	while(true){
 
+	pthread_mutex_lock(&counter_mutex);
+	vector<Qiushi>* qiushiList = &(QiushiMgr::Instance()->mDownQiushiList);
+	int mPicIndex = QiushiMgr::Instance()->mPicIndex;
+	pthread_mutex_unlock(&counter_mutex);
+	int qiushiCount = 0;
+	while(IsDown){
 		socket->write("haha",4);
 		socket->read(strLen,32);
 		int len = atoi(strLen);
-		content = new char[len];
+		if(len <= 0)
+			continue;
+		char * content = new char [len+1];
 		socket->read(content,len+1);
 		socket->read(strLen,32);
-		
-		len = atoi(strLen);
-		picPath[0] = '\n';
-		
-		if(len != 0)
+		int picLen = atoi(strLen);
+		sprintf(picPath,"");
+		if(picLen != 0)
 		{
-			sprintf(picPath,"qiushi/pic/pic_%d_%d.jpg",lagePage,qiushiCount);
+			if(picLen != 53654)
+				picLen = 53654;
+			sprintf(picPath,"qiushi/pic/pic_%d.jpg",++mPicIndex);
 			char * buffer;
-			buffer = new char [len];
+			buffer = new char [picLen];
 			socket->write("haha",4);
-			socket->read(buffer,len);
+			int cc = socket->read(buffer,picLen);
+			if( cc != 53654)
+				continue;
 			FILE* file = fopen(picPath, "wb");
-			
-			fwrite(buffer,len,1,file);
+			fwrite(buffer,picLen,1,file);
 			delete[] buffer;
 			fclose(file);
 		}
-		qiushiList.push_back(Qiushi(content,picPath));
+		pthread_mutex_lock(&counter_mutex);
+		(*qiushiList).push_back(Qiushi(content,picPath));
+		QiushiMgr::Instance()->mPicIndex = mPicIndex;
+		pthread_mutex_unlock(&counter_mutex);
 		delete[] content;
+		/*
 		qiushiCount++;
 		if( qiushiCount == 100)
 		{
@@ -137,10 +187,17 @@ void* QiushiMgr::DownLoad_thread(void *arg)
 			{
 				CCDictionary* qiushi = CCDictionary::create();
 				qiushi->retain();
-				qiushi->setObject(CCString::create(qiushiList[i].content),"content" );
-				qiushi->setObject(CCString::create(qiushiList[i].picPath),"picPath" );
+				CCString* conCCS = CCString::create(qiushiList[i].content);
+				conCCS->retain();
+				qiushi->setObject(conCCS,"content" );
+				CCString* picCCS = CCString::create(qiushiList[i].picPath);
+				picCCS->retain();
+				qiushi->setObject(picCCS,"picPath" );
 				sprintf(strLen,"qiushi%d",i);
+
 				dict->setObject(qiushi,strLen);
+				conCCS->release();
+				picCCS->release();
 			}
 			sprintf(strLen,"qiushi/%d.plist",++lagePage);
 
@@ -149,10 +206,10 @@ void* QiushiMgr::DownLoad_thread(void *arg)
 			dict->writeToFile(strLen);
 			dict->removeAllObjects();
 			dict->release();
+			
 			qiushiList.clear();
 			qiushiCount = 0;
-		}
+		}*/
 	}
-	QiushiMgr::Instance()->WriteConfig();
 	return NULL;
 }

@@ -1,5 +1,4 @@
 ﻿#include "LaughterScene.h"
-#include "Tools.h"
 #include "Language.h"
 
 USING_NS_CC;
@@ -42,29 +41,31 @@ bool LaughterScene::init()
 
 	mDownLoad = CCLabelTTF::create(Language::Instance()->download.getCString(), "Marker Felt", 16);
 	CCControlButton *button = CCControlButton::create(mDownLoad,psc9ButtonBG);
-	button->setPosition(ccp( mDownLoad->getContentSize().width/2 +10,
-		origin.y + mDownLoad->getContentSize().height/2 +5 ));
+	button->setPosition(ccp(origin.x + mDownLoad->getContentSize().width/2 + 10,
+		origin.y + mDownLoad->getContentSize().height/2 + 5 ));
 	this->addChild(button,1);
 	button->addTargetWithActionForControlEvents(this,cccontrol_selector(LaughterScene::downLoadTouched),CCControlEventTouchUpInside);
 	
 	
 	mScrollView = CCScrollView::create();
+	mScrollView->setAnchorPoint(ccp(0,0));
 	mScrollView->setBounceable(false);
 	mScrollView->setDirection(kCCScrollViewDirectionVertical);  
-	mScrollView->setPosition(0,30);
-	mScrollView->setViewSize(ccp(320,450));
+	float he = origin.y + 30;
+	mScrollView->setPosition(0,he);
+	mScrollView->setViewSize(ccp(visibleSize.width + origin.x  ,visibleSize.height + origin.y - 30));
 	mContainer = CCLayer::create();
 
 	mQiushiLabel = CCLabelTTF::create("", "Marker Felt", 18);
 	mQiushiLabel->setAnchorPoint(ccp(0,0));
-	mQiushiLabel->setDimensions(ccp(310,0));
+	mQiushiLabel->setDimensions(ccp(visibleSize.width  ,0));
 	ccColor3B colorText;
 	colorText.r = 0;
 	colorText.g = 0;
 	colorText.b = 0;
 	mQiushiLabel->setColor(colorText);
-	mQiushiLabel->setHorizontalAlignment(CCTextAlignment::kCCTextAlignmentLeft);
-	mQiushiLabel->setVerticalAlignment(CCVerticalTextAlignment::kCCVerticalTextAlignmentTop);
+	mQiushiLabel->setHorizontalAlignment(kCCTextAlignmentLeft);
+	mQiushiLabel->setVerticalAlignment(kCCVerticalTextAlignmentTop);
 	mContainer->addChild(mQiushiLabel);
 	mScrollView->setContainer(mContainer);
 	this->addChild(mScrollView);
@@ -73,10 +74,19 @@ bool LaughterScene::init()
 	mQiushiSprite = NULL;
 	_displayQiushi(content);
 	mIsDownLoad = false;
+
+	schedule(schedule_selector(LaughterScene::_scheduleCheckDownLoad),1.0);
     return true;
+}
+void LaughterScene::_scheduleCheckDownLoad(float dt)
+{
+	QiushiMgr::Instance()->CheckDownLoadQiushi();
 }
 void LaughterScene::_displayQiushi(Qiushi* qiushi)
 {
+	CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+	CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
+
 	mQiushiLabel->setString(qiushi->content.c_str());
 	float spriteHeight = 0;
 	CCSize labelSize = mQiushiLabel->getContentSize();
@@ -90,17 +100,17 @@ void LaughterScene::_displayQiushi(Qiushi* qiushi)
 		mQiushiSprite = CCSprite::create(qiushi->picPath.c_str());
 		mQiushiSprite->setAnchorPoint(ccp(0,0));
 		CCSize spriteSize = mQiushiSprite->getContentSize();
-		float scale = spriteSize.width/320.0;
-		if(scale > spriteSize.height/480.0)
-			scale = spriteSize.height/480.0;
+		float scale = spriteSize.width/visibleSize.width;
+		if(scale > spriteSize.height/visibleSize.height)
+			scale = spriteSize.height/visibleSize.height;
 		mQiushiSprite->setScale(scale);
 		spriteHeight = spriteSize.height * scale;
 		mQiushiSprite->setPosition(ccp(0,0));
 		mContainer->addChild(mQiushiSprite);
 	}
-	mQiushiLabel->setPosition(ccp(0,spriteHeight));
+	mQiushiLabel->setPosition(ccp(origin.x,spriteHeight));
 	float totalHieght = spriteHeight+labelSize.height;
-	mScrollView->setContentSize(ccp(320,totalHieght));
+	mScrollView->setContentSize(ccp(visibleSize.width + origin.x,totalHieght + origin.y));
 	mScrollView->setContentOffset(ccp(0,-totalHieght));
 }
 void LaughterScene::menuNextCallback(CCObject* pSender)

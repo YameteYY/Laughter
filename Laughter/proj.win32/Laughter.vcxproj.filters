@@ -41,9 +41,6 @@
     <ClInclude Include="..\Classes\QiushiMgr.h">
       <Filter>Classes</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\Tools.h">
-      <Filter>Classes</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\Language.h">
       <Filter>Classes</Filter>
     </ClInclude>

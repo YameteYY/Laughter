@@ -1,18 +1,26 @@
 #ifndef __CSocket__
 #define __CSocket__
-#if CC_TARGET_PLATFORM==CC_PLATFORM_WIN32
+
+#define  SOCKET_WIN32
+
+#ifdef SOCKET_WIN32
 #include <winsock.h>
-#elif CC_TARGET_PLATFORM==CC_PLATFORM_ANDROID
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#elif CC_TARGET_PLATFORM==CC_PLATFORM_IOS
+#endif
+
+#ifdef SOCKET_ANDROID
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #endif
+
+#ifdef SOCKET_IOS
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#endif
+
 #include <string>
 using namespace std;
 class CSocket{
@@ -26,7 +34,7 @@ public:
 private:
 	string m_szAddress;
 	int m_nPort;
-#if CC_TARGET_PLATFORM==CC_PLATFORM_WIN32
+#ifdef SOCKET_WIN32
 	SOCKET handlerSocket;
 	//这两个函数只有在windows下面才用
 	//初始化网络模块，一定不能忘，在main函数里面调用一次就可以了。

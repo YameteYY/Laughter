@@ -34,6 +34,7 @@ public:
 	void WriteConfig();
 	void DownLoadQiushi();
 	void UnDownLoadQiushi();
+	void CheckDownLoadQiushi();
 	CSocket* GetSocket();
 private:
 	CSocket mSocket;
@@ -44,7 +45,9 @@ private:
 	int mCurrentPage;
 	int mLagePage;
 	int mCurrentQiushi;
+	int mPicIndex;
 	vector<Qiushi> mQiusiList;
+	vector<Qiushi> mDownQiushiList;
 	static QiushiMgr* m_pInstance;
 	QiushiMgr(){}
 	
