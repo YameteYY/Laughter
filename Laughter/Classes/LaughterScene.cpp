@@ -16,6 +16,7 @@ CCScene* LaughterScene::scene()
 }
 bool LaughterScene::init()
 {
+
     if ( !CCLayer::init() )
     {
         return false;

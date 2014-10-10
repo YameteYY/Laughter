@@ -6,4 +6,6 @@ void Language::Read()
 	download = *dynamic_cast<CCString*>(plistDic->objectForKey("download"));
 
 	loading = *dynamic_cast<CCString*>(plistDic->objectForKey("loading"));
+
+	ipAdrress = *dynamic_cast<CCString*>(plistDic->objectForKey("ip"));
 }

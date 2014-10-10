@@ -16,6 +16,7 @@ public:
 	}
 	CCString download;
 	CCString loading;
+	CCString ipAdrress;
 	void Read();
 private:
 	Language(){}

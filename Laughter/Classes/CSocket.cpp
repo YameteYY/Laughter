@@ -13,18 +13,19 @@ bool CSocket::connect(const char *adr, int port)
 {
 	this->m_szAddress = adr;
 	this->m_nPort = port;
-	sockaddr_in sa;
+	struct sockaddr_in sa;
 	struct hostent *hp;
 	hp = gethostbyname(m_szAddress.c_str());
-	if (hp)
-	{
-		const char *addr = inet_ntoa(*(struct in_addr *)hp->h_addr_list[0]);
-		struct in_addr ip;
-		ip.s_addr = inet_addr(addr);
-		sa.sin_family = AF_INET;
-		sa.sin_port = htons(m_nPort);
-		sa.sin_addr = ip;
-	}
+	if(!hp)
+		return false;
+
+	const char *addr = inet_ntoa(*(struct in_addr *)hp->h_addr_list[0]);
+	struct in_addr ip;
+	ip.s_addr = inet_addr(addr);
+	sa.sin_family = AF_INET;
+	sa.sin_port = htons(m_nPort);
+	sa.sin_addr = ip;
+
 	if (sa.sin_port == 0)
 	{
 		return false;

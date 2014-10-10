@@ -6,5 +6,7 @@
 		<string>点我下载</string>
 		<key>loading</key>
 		<string>下载中</string>
+		<key>ip</key>
+    <string>10.12.20.147</string>
 </dict>  
 </plist>  

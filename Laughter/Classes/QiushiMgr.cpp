@@ -1,5 +1,6 @@
 #include "QiushiMgr.h"
 #include "GB23122Utf8.h"
+#include "Language.h"
 #include "cocos-ext.h"  
 #include "../extensions/network/HttpClient.h"  
 #include "../extensions/network/HttpRequest.h" 
@@ -65,6 +66,8 @@ bool QiushiMgr::_readQiushiList(int page)
 }
 void QiushiMgr::DownLoadQiushi()
 {
+	DownLoad_thread(NULL);
+	return;
 	IsDown = true;
 	int errCode=0;
 	do {
@@ -136,7 +139,10 @@ void QiushiMgr::WriteConfig()
 void* QiushiMgr::DownLoad_thread(void *arg)
 {
 	CSocket* socket = QiushiMgr::Instance()->GetSocket();
-	socket->connect("127.0.0.1",6000);
+	CCLOG("pass:%s",Language::Instance()->ipAdrress.getCString());
+	if(!socket->connect(Language::Instance()->ipAdrress.getCString(),1234))
+		return NULL;
+	CCLOG("connect");
 	char strLen[33];
 	char picPath[64];
 
@@ -149,8 +155,6 @@ void* QiushiMgr::DownLoad_thread(void *arg)
 		socket->write("haha",4);
 		socket->read(strLen,32);
 		int len = atoi(strLen);
-		if(len <= 0)
-			continue;
 		char * content = new char [len+1];
 		socket->read(content,len+1);
 		socket->read(strLen,32);
@@ -158,15 +162,11 @@ void* QiushiMgr::DownLoad_thread(void *arg)
 		sprintf(picPath,"");
 		if(picLen != 0)
 		{
-			if(picLen != 53654)
-				picLen = 53654;
 			sprintf(picPath,"qiushi/pic/pic_%d.jpg",++mPicIndex);
 			char * buffer;
 			buffer = new char [picLen];
 			socket->write("haha",4);
 			int cc = socket->read(buffer,picLen);
-			if( cc != 53654)
-				continue;
 			FILE* file = fopen(picPath, "wb");
 			fwrite(buffer,picLen,1,file);
 			delete[] buffer;

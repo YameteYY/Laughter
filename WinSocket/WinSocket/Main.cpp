@@ -63,9 +63,9 @@ int main()
 	}
 	SOCKET sockSrv=socket(AF_INET,SOCK_STREAM,0);
 	SOCKADDR_IN addrSrv;
-	addrSrv.sin_addr.S_un.S_addr=htonl(INADDR_ANY);
+	addrSrv.sin_addr.s_addr = INADDR_ANY;
 	addrSrv.sin_family=AF_INET;
-	addrSrv.sin_port=htons(6000);
+	addrSrv.sin_port=htons(1234);
 
 	bind(sockSrv,(SOCKADDR*)&addrSrv,sizeof(SOCKADDR));
 	listen(sockSrv,5);
